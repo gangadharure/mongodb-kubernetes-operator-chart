@@ -1,0 +1,1 @@
+{{- .Files.Get "operator/deploy/crds/mongodb.com_mongodb_crd.yaml" -}}
