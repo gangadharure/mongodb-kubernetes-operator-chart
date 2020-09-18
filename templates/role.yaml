@@ -1,7 +1,12 @@
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: {{ if eq (.Values.operator.watchNamespace | default "") "" }} ClusterRole {{ else }} Role {{ end }}
 metadata:
   name: {{ include "chart.fullname" . }}
+  {{- if not (eq (.Values.operator.watchNamespace | default "") "") }}
+  namespace: {{ .Values.operator.watchNamespace }}
+  {{- else }}
+  namespace: {{ .Release.Namespace }}
+  {{- end }}
   labels:
     {{- include "chart.labels" . | nindent 4 }}
 rules:
@@ -39,6 +44,15 @@ rules:
   - patch
   - update
   - watch
+  {{- if eq (.Values.operator.watchNamespace | default "") "" }}
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - list
+  - watch
+  {{- end}}
 - apiGroups:
   - monitoring.coreos.com
   resources:

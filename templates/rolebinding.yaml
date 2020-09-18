@@ -1,13 +1,21 @@
-kind: RoleBinding
+kind: {{ if eq (.Values.operator.watchNamespace | default "") "" }} ClusterRoleBinding {{ else }} RoleBinding {{ end }}
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "chart.fullname" . }}
+  {{- if not (eq (.Values.operator.watchNamespace | default "") "") }}
+  namespace: {{ .Values.operator.watchNamespace }}
+  {{- else }}
+  namespace: {{ .Release.Namespace }}
+  {{- end }}
   labels:
     {{- include "chart.labels" . | nindent 4 }}
 subjects:
 - kind: ServiceAccount
   name: {{ include "chart.serviceAccountName" . }}
+  {{- if .Release.Namespace }}
+  namespace: {{ .Release.Namespace }}
+  {{- end }}
 roleRef:
-  kind: Role
+  kind: {{ if eq (.Values.operator.watchNamespace | default "") "" }} ClusterRole {{ else }} Role {{ end }}
   name: {{ include "chart.fullname" . }}
   apiGroup: rbac.authorization.k8s.io
